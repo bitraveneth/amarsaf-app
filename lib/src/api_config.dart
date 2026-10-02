@@ -3,7 +3,17 @@ const defaultApiOrigin = 'https://erp.amarsaf.com';
 /// Shift pings while punched in. Kept inside the 10–15 minute window.
 const shiftPingInterval = Duration(minutes: 12);
 
-enum HomeRole { sales, dealer, unsupported }
+enum HomeRole { sales, dealer, punch, office, unsupported }
+
+/// Jobs that punch in and out, and do not see the sales list.
+const punchRoles = {
+  'warehouse_officer',
+  'production_officer',
+  'qc_officer',
+  'delivery_coordinator',
+  'purchase_executive',
+  'accounts_officer',
+};
 
 /// Origin or full `/api` root → `https://host/api` with no trailing slash.
 String normalizeApiRoot(String input) {
@@ -26,12 +36,24 @@ String displayApiOrigin(String stored) {
   return root;
 }
 
+/// Home follows `user.role`. An employee id alone is not a sales login.
 HomeRole resolveHomeRole(Map<String, dynamic>? user) {
   if (user == null) return HomeRole.unsupported;
-  if (user['employee_id'] != null) return HomeRole.sales;
-  if (user['agent_id'] != null) return HomeRole.dealer;
+  final role = '${user['role'] ?? ''}'.trim().toLowerCase();
+  final hasEmployee = user['employee_id'] != null;
+  final hasAgent = user['agent_id'] != null;
+
+  if (role == 'sales_officer') return HomeRole.sales;
+  if (role == 'super_admin' || role == 'admin') return HomeRole.office;
+  if (punchRoles.contains(role)) {
+    return hasEmployee ? HomeRole.punch : HomeRole.unsupported;
+  }
+  if (role.contains('driver')) return HomeRole.unsupported;
+  if (hasAgent && !hasEmployee) return HomeRole.dealer;
   return HomeRole.unsupported;
 }
+
+bool homePunches(HomeRole role) => role == HomeRole.sales || role == HomeRole.punch;
 
 String todayIso([DateTime? now]) {
   final n = now ?? DateTime.now();

@@ -12,11 +12,22 @@ void main() {
     expect(displayApiOrigin('https://erp.amarsaf.com/api'), 'https://erp.amarsaf.com');
   });
 
-  test('login payload picks sales, dealer, or neither', () {
+  test('home follows the job, not merely an employee id', () {
     expect(resolveHomeRole({'employee_id': 4, 'agent_id': null, 'role': 'sales_officer'}), HomeRole.sales);
     expect(resolveHomeRole({'employee_id': null, 'agent_id': 9, 'role': 'agent'}), HomeRole.dealer);
     expect(resolveHomeRole({'employee_id': 4, 'agent_id': 9, 'role': 'sales_officer'}), HomeRole.sales);
     expect(resolveHomeRole({'employee_id': null, 'agent_id': null, 'role': 'driver'}), HomeRole.unsupported);
+    expect(resolveHomeRole({'employee_id': 4, 'role': 'driver'}), HomeRole.unsupported);
+
+    for (final role in punchRoles) {
+      expect(resolveHomeRole({'employee_id': 8, 'role': role}), HomeRole.punch, reason: role);
+      expect(resolveHomeRole({'employee_id': null, 'agent_id': 3, 'role': role}), HomeRole.unsupported, reason: role);
+    }
+
+    expect(resolveHomeRole({'employee_id': 1, 'role': 'admin'}), HomeRole.office);
+    expect(resolveHomeRole({'employee_id': 1, 'role': 'super_admin'}), HomeRole.office);
+    expect(resolveHomeRole({'employee_id': 4, 'agent_id': null}), HomeRole.unsupported);
+    expect(resolveHomeRole(null), HomeRole.unsupported);
   });
 
   test('shift pings sit between 10 and 15 minutes', () {

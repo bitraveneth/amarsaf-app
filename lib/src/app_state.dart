@@ -51,7 +51,7 @@ class AppState extends ChangeNotifier {
   String get displayName => '${user?['name'] ?? employee?['name'] ?? agent?['name'] ?? ''}';
 
   bool get shouldPing =>
-      token != null && role == HomeRole.sales && punchedIn && queue.pendingPunch(userId) == null;
+      token != null && homePunches(role) && punchedIn && queue.pendingPunch(userId) == null;
 
   Future<void> bootstrap() async {
     final prefs = await SharedPreferences.getInstance();
@@ -152,7 +152,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> refreshPunch() async {
-    if (token == null || role != HomeRole.sales) {
+    if (token == null || !homePunches(role)) {
       punchedIn = false;
       notifyListeners();
       return;

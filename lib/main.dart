@@ -77,9 +77,97 @@ class _AmarSafAppState extends State<AmarSafApp> with WidgetsBindingObserver {
         return const SalesHomeScreen();
       case HomeRole.dealer:
         return const DealerHomeScreen();
+      case HomeRole.punch:
+        return const PunchHomeScreen();
+      case HomeRole.office:
+        return const OfficeScreen();
       case HomeRole.unsupported:
         return const UnsupportedScreen();
     }
+  }
+}
+
+/// Name and today's punch. No TA/DA, visits, or dealer orders.
+class PunchHomeScreen extends StatelessWidget {
+  const PunchHomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    final text = state.text;
+    return FieldScaffold(
+      title: text.attendance,
+      brandHeader: true,
+      actions: [
+        IconButton(onPressed: state.logout, icon: const Icon(Icons.logout), tooltip: text.logout),
+      ],
+      body: RefreshIndicator(
+        onRefresh: state.refreshPunch,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          children: [
+            const QueueBanner(),
+            Text(
+              '${text.hello}, ${state.displayName}',
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: ink, letterSpacing: -0.4),
+            ),
+            const SizedBox(height: 20),
+            GroupedList(
+              children: [
+                GroupedRow(
+                  title: text.attendance,
+                  subtitle: _todayPunch(state),
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PunchScreen()));
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _todayPunch(AppState state) {
+    final text = state.text;
+    final pending = state.queue.pendingPunch(state.userId);
+    if (pending != null) return text.waitingPunch;
+    if (state.shiftInAt != null && state.punchedIn) {
+      return '${text.inAt} ${formatClock(state.shiftInAt!)}';
+    }
+    if (state.shiftInAt != null && state.shiftOutAt != null) {
+      return '${text.inAt} ${formatClock(state.shiftInAt!)} · ${text.outAt} ${formatClock(state.shiftOutAt!)}';
+    }
+    return text.notPunched;
+  }
+}
+
+class OfficeScreen extends StatelessWidget {
+  const OfficeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    return FieldScaffold(
+      title: state.text.appName,
+      brandHeader: true,
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(state.text.officeOnly, style: const TextStyle(fontSize: 18, height: 1.4, color: ink)),
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: state.logout,
+              child: Text(state.text.logout),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

@@ -99,6 +99,9 @@ class L10n {
   String get driverLater => bn
       ? 'ড্রাইভারের স্ক্রিন এখনো এই অ্যাপে নেই।'
       : 'Driver screens are not in this app yet.';
+  String get officeOnly => bn
+      ? 'এই কাজ অফিসের কম্পিউটারেই থাকে।'
+      : 'This work stays on the office computer.';
   String get noRole => bn
       ? 'এই লগইনে কর্মী বা ডিলার যুক্ত নেই। অফিসে বলুন অ্যাকাউন্ট ঠিক করতে।'
       : 'This login is not linked to an employee or a dealer. Ask the office to fix the account.';
