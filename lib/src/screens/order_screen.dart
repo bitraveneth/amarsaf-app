@@ -214,7 +214,7 @@ class _OrderScreenState extends State<OrderScreen> {
                           contentPadding: EdgeInsets.zero,
                           title: Text('${agent['name']}'),
                           subtitle: Text('${agent['zone'] ?? ''}'),
-                          trailing: _agentId == asInt(agent['id']) ? const Icon(Icons.check, color: teal) : null,
+                          trailing: _agentId == asInt(agent['id']) ? const Icon(Icons.check, color: brand) : null,
                           onTap: () {
                             setState(() => _agentId = asInt(agent['id']));
                             _loadProducts(reset: true);
@@ -266,7 +266,7 @@ class _OrderScreenState extends State<OrderScreen> {
                       ),
                       IconButton(onPressed: () => _changeQty(item, -1), icon: const Icon(Icons.remove_circle_outline)),
                       Text('${_qty[item.id] ?? 0}', style: const TextStyle(fontWeight: FontWeight.w700)),
-                      IconButton(onPressed: () => _changeQty(item, 1), icon: const Icon(Icons.add_circle_outline, color: teal)),
+                      IconButton(onPressed: () => _changeQty(item, 1), icon: const Icon(Icons.add_circle_outline, color: brand)),
                     ],
                   ),
                 ),

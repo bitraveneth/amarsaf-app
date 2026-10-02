@@ -64,6 +64,7 @@ class _SalesHomeScreenState extends State<SalesHomeScreen> {
     final text = state.text;
     return FieldScaffold(
       title: text.salesTitle,
+      brandHeader: true,
       actions: [
         IconButton(onPressed: state.logout, icon: const Icon(Icons.logout), tooltip: text.logout),
       ],
@@ -89,7 +90,7 @@ class _SalesHomeScreenState extends State<SalesHomeScreen> {
                 child: ListTile(
                   title: Text(text.attendance),
                   subtitle: Text(_attendanceLine(state, text), style: const TextStyle(fontSize: 16, color: ink, fontWeight: FontWeight.w600)),
-                  trailing: const Icon(Icons.schedule, color: teal),
+                  trailing: const Icon(Icons.schedule, color: brand),
                   onTap: () => _open(const PunchScreen()),
                 ),
               ),
@@ -184,7 +185,7 @@ class _ActionGrid extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(item.$2, color: teal),
+                    Icon(item.$2, color: brand),
                     const Spacer(),
                     Text(item.$1, style: const TextStyle(fontWeight: FontWeight.w700, color: ink)),
                   ],
@@ -256,7 +257,7 @@ class _PunchScreenState extends State<PunchScreen> {
           const SizedBox(height: 20),
           FilledButton(
             onPressed: _busy ? null : () => _punch(!onShift),
-            style: FilledButton.styleFrom(backgroundColor: onShift ? clay : teal),
+            style: FilledButton.styleFrom(backgroundColor: onShift ? clay : brand),
             child: Text(_busy ? text.loading : (onShift ? text.punchOut : text.punchIn)),
           ),
         ],
@@ -343,7 +344,7 @@ class _VisitsScreenState extends State<VisitsScreen> {
           );
           if (added == true) _load();
         },
-        backgroundColor: teal,
+        backgroundColor: brand,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
         label: Text(text.addVisit),
@@ -394,7 +395,7 @@ class _VisitCard extends StatelessWidget {
               if (visit['slot'] != null) Text('${visit['slot']}', style: const TextStyle(color: muted)),
               if (visit['notes'] != null && '${visit['notes']}'.isNotEmpty) Text('${visit['notes']}'),
               const SizedBox(height: 6),
-              Text(text.statusLabel(status), style: TextStyle(color: done ? teal : clay, fontWeight: FontWeight.w600)),
+              Text(text.statusLabel(status), style: TextStyle(color: done ? brand : clay, fontWeight: FontWeight.w600)),
               if (visit['latitude'] != null)
                 Text('${visit['latitude']}, ${visit['longitude']}', style: const TextStyle(color: muted, fontSize: 12)),
               if (!done) ...[
@@ -533,7 +534,7 @@ class _AddVisitScreenState extends State<AddVisitScreen> {
                       child: ListTile(
                         title: Text('${agent['name']}'),
                         subtitle: Text('${agent['zone'] ?? agent['area'] ?? ''}'),
-                        trailing: _agentId == id ? const Icon(Icons.check, color: teal) : null,
+                        trailing: _agentId == id ? const Icon(Icons.check, color: brand) : null,
                         onTap: () => setState(() => _agentId = id),
                       ),
                     );
@@ -661,7 +662,7 @@ class _AllowanceScreenState extends State<AllowanceScreen> {
             contentPadding: EdgeInsets.zero,
             title: Text(text.date),
             subtitle: Text(_date),
-            trailing: const Icon(Icons.calendar_today, color: teal),
+            trailing: const Icon(Icons.calendar_today, color: brand),
             onTap: () async {
               final picked = await showDatePicker(
                 context: context,
@@ -688,7 +689,7 @@ class _AllowanceScreenState extends State<AllowanceScreen> {
               alignment: Alignment.centerLeft,
               child: TextButton(onPressed: () => setState(() => _photo = null), child: Text(text.removePhoto)),
             ),
-          if (_photo != null) Text(text.photoAttached, style: const TextStyle(color: tealDark)),
+          if (_photo != null) Text(text.photoAttached, style: const TextStyle(color: brand)),
           if (_error != null) ...[
             const SizedBox(height: 8),
             Text(_error!, style: const TextStyle(color: clay)),
@@ -706,7 +707,7 @@ class _AllowanceScreenState extends State<AllowanceScreen> {
                 contentPadding: EdgeInsets.zero,
                 title: Text('${bill['type']} · ${taka(bill['amount'])}'),
                 subtitle: Text('${bill['date'] ?? ''} · ${text.statusLabel('${bill['status']}')}'),
-                trailing: bill['attachment_path'] != null ? const Icon(Icons.attach_file, color: teal) : null,
+                trailing: bill['attachment_path'] != null ? const Icon(Icons.attach_file, color: brand) : null,
               ),
         ],
       ),

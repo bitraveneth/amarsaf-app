@@ -58,6 +58,7 @@ class _DealerHomeScreenState extends State<DealerHomeScreen> {
     final text = state.text;
     return FieldScaffold(
       title: text.dealerTitle,
+      brandHeader: true,
       actions: [
         IconButton(onPressed: state.logout, icon: const Icon(Icons.logout), tooltip: text.logout),
       ],

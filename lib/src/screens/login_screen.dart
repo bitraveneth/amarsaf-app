@@ -71,24 +71,17 @@ class _LoginScreenState extends State<LoginScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
               children: [
-                Row(
+                const Row(
                   children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(color: teal, borderRadius: BorderRadius.circular(14)),
-                      child: const Icon(Icons.water_drop, color: Colors.white),
-                    ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('AmarSaf', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: ink)),
-                        ],
+                    BrandMark(size: 56),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: BrandWordmark(height: 40),
                       ),
                     ),
-                    const LanguageButton(),
+                    LanguageButton(),
                   ],
                 ),
                 const SizedBox(height: 4),

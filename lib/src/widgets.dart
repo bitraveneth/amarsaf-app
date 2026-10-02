@@ -4,6 +4,41 @@ import 'package:provider/provider.dart';
 import 'app_state.dart';
 import 'theme.dart';
 
+class BrandMark extends StatelessWidget {
+  const BrandMark({super.key, this.size = 48});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      'assets/brand/mark_purple.png',
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+      excludeFromSemantics: true,
+    );
+  }
+}
+
+class BrandWordmark extends StatelessWidget {
+  const BrandWordmark({super.key, this.height = 32});
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final bn = context.watch<AppState>().language == 'bn';
+    return Image.asset(
+      bn ? 'assets/brand/wordmark_bn.png' : 'assets/brand/wordmark_en.png',
+      height: height,
+      fit: BoxFit.contain,
+      alignment: Alignment.centerLeft,
+      semanticLabel: 'AmarSaf',
+    );
+  }
+}
+
 class LanguageButton extends StatelessWidget {
   const LanguageButton({super.key});
 
@@ -26,18 +61,29 @@ class FieldScaffold extends StatelessWidget {
     required this.body,
     this.actions = const [],
     this.floatingActionButton,
+    this.brandHeader = false,
   });
 
   final String title;
   final Widget body;
   final List<Widget> actions;
   final Widget? floatingActionButton;
+  final bool brandHeader;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        titleSpacing: brandHeader ? 16 : NavigationToolbar.kMiddleSpacing,
+        title: brandHeader
+            ? const Row(
+                children: [
+                  BrandMark(size: 32),
+                  SizedBox(width: 10),
+                  Flexible(child: BrandWordmark(height: 26)),
+                ],
+              )
+            : Text(title),
         actions: [...actions, const LanguageButton()],
       ),
       floatingActionButton: floatingActionButton,
@@ -89,7 +135,7 @@ class QueueBanner extends StatelessWidget {
                       child: Text(
                         '$pending ${text.queued}'
                         '${failed > 0 ? ' · $failed ${text.syncFailed}' : ''}',
-                        style: const TextStyle(color: tealDark, fontWeight: FontWeight.w600),
+                        style: const TextStyle(color: brand, fontWeight: FontWeight.w600),
                       ),
                     ),
                     if (pending > 0)

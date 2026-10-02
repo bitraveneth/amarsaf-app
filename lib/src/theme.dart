@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
+/// Dominant purple sampled from the AmarSaf mark (#6D2BD5).
+const brand = Color(0xFF6D2BD5);
 const ink = Color(0xFF14241F);
 const paper = Color(0xFFF3F0E8);
 const card = Color(0xFFFFFCF7);
-const teal = Color(0xFF0E6B54);
-const tealDark = Color(0xFF0A4A3B);
 const clay = Color(0xFFB5522E);
 const line = Color(0xFFE3DCCD);
 const muted = Color(0xFF5C6A64);
@@ -14,11 +14,13 @@ ThemeData buildTheme() {
   final base = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: teal,
-      primary: teal,
+      seedColor: brand,
+      primary: brand,
       onPrimary: Colors.white,
       surface: paper,
-      secondary: clay,
+      onSurface: ink,
+      secondary: brand,
+      onSecondary: Colors.white,
     ),
     scaffoldBackgroundColor: paper,
     fontFamily: null,
@@ -31,6 +33,7 @@ ThemeData buildTheme() {
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: false,
+      shape: Border(bottom: BorderSide(color: brand, width: 2)),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -46,13 +49,13 @@ ThemeData buildTheme() {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: teal, width: 1.4),
+        borderSide: const BorderSide(color: brand, width: 1.4),
       ),
       labelStyle: const TextStyle(color: muted),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: teal,
+        backgroundColor: brand,
         foregroundColor: Colors.white,
         minimumSize: const Size.fromHeight(52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -77,5 +80,13 @@ ThemeData buildTheme() {
       margin: EdgeInsets.zero,
     ),
     dividerColor: line,
+    progressIndicatorTheme: const ProgressIndicatorThemeData(color: brand),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: brand,
+      foregroundColor: Colors.white,
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(foregroundColor: brand),
+    ),
   );
 }

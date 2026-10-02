@@ -93,6 +93,7 @@ class UnsupportedScreen extends StatelessWidget {
     final message = role.contains('driver') ? state.text.driverLater : state.text.noRole;
     return FieldScaffold(
       title: state.text.appName,
+      brandHeader: true,
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
