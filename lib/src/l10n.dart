@@ -11,6 +11,16 @@ class L10n {
   String get signingIn => bn ? 'প্রবেশ হচ্ছে…' : 'Signing in…';
   String get email => bn ? 'ইমেইল' : 'Email';
   String get password => bn ? 'পাসওয়ার্ড' : 'Password';
+  String get showPassword => bn ? 'পাসওয়ার্ড দেখান' : 'Show password';
+  String get hidePassword => bn ? 'পাসওয়ার্ড লুকান' : 'Hide password';
+  String get accountFromOffice => bn
+      ? 'এই অ্যাকাউন্ট অফিস থেকে দেওয়া।'
+      : 'Your account comes from the office.';
+  String get forgotPassword => bn ? 'পাসওয়ার্ড ভুলে গেছেন?' : 'Forgot password';
+  String get officeResetsPassword => bn
+      ? 'পাসওয়ার্ড অফিস রিসেট করে। নতুন পাসওয়ার্ডের জন্য অফিসে বলুন।'
+      : 'The office resets passwords. Ask the office for a new one.';
+  String get back => bn ? 'ফিরে যান' : 'Back';
   String get server => bn ? 'সার্ভার' : 'Server';
   String get serverHint => bn
       ? 'খালি রাখলে erp.amarsaf.com ব্যবহার হবে'
@@ -62,6 +72,7 @@ class L10n {
   String get submit => bn ? 'জমা দিন' : 'Submit';
   String get description => bn ? 'বিবরণ' : 'Description';
   String get date => bn ? 'তারিখ' : 'Date';
+  String get deliveryDate => bn ? 'ডেলিভারির তারিখ' : 'Delivery date';
   String get search => bn ? 'খুঁজুন' : 'Search';
   String get searchProducts => bn ? 'নাম বা এসকেইউ' : 'Name or SKU';
   String get placeOrder => bn ? 'অর্ডার দিন' : 'Place order';

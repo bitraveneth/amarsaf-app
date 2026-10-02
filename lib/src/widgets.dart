@@ -116,7 +116,7 @@ class QueueBanner extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Material(
-        color: moss,
+        color: card,
         borderRadius: BorderRadius.circular(14),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
@@ -135,7 +135,7 @@ class QueueBanner extends StatelessWidget {
                       child: Text(
                         '$pending ${text.queued}'
                         '${failed > 0 ? ' · $failed ${text.syncFailed}' : ''}',
-                        style: const TextStyle(color: brand, fontWeight: FontWeight.w600),
+                        style: const TextStyle(color: ink, fontWeight: FontWeight.w600),
                       ),
                     ),
                     if (pending > 0)
@@ -152,6 +152,78 @@ class QueueBanner extends StatelessWidget {
                 ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class GroupedList extends StatelessWidget {
+  const GroupedList({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: card,
+      borderRadius: BorderRadius.circular(14),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0) const Divider(height: 1, indent: 16),
+            children[i],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class GroupedRow extends StatelessWidget {
+  const GroupedRow({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.value,
+    this.onTap,
+  });
+
+  final String title;
+  final String? subtitle;
+  final String? value;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontSize: 17, color: ink, height: 1.2)),
+                  if (subtitle != null && subtitle!.isNotEmpty) ...[
+                    const SizedBox(height: 3),
+                    Text(subtitle!, style: const TextStyle(color: muted, fontSize: 14, height: 1.3)),
+                  ],
+                ],
+              ),
+            ),
+            if (value != null) ...[
+              const SizedBox(width: 12),
+              Text(value!, style: const TextStyle(color: muted, fontSize: 16)),
+            ],
+            if (onTap != null) ...[
+              const SizedBox(width: 4),
+              const Icon(Icons.chevron_right, color: muted, size: 20),
+            ],
+          ],
         ),
       ),
     );
@@ -217,7 +289,7 @@ class LoadError extends StatelessWidget {
         children: [
           Text(message, textAlign: TextAlign.center),
           const SizedBox(height: 12),
-          OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
+          TextButton(onPressed: onRetry, child: Text(retryLabel)),
         ],
       ),
     );

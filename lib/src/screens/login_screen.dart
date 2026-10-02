@@ -19,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _password = TextEditingController();
   final _server = TextEditingController();
   bool _busy = false;
+  bool _hidePassword = true;
   String? _error;
 
   @override
@@ -59,6 +60,35 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _editServer() async {
+    final text = context.read<AppState>().text;
+    final draft = TextEditingController(text: _server.text);
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(text.server),
+        content: TextField(
+          controller: draft,
+          autocorrect: false,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: defaultApiOrigin,
+            helperText: text.serverHint,
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(text.cancel)),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(text.save)),
+        ],
+      ),
+    );
+    if (saved == true && mounted) {
+      setState(() => _server.text = draft.text.trim());
+      await context.read<AppState>().setServer(_server.text);
+    }
+    draft.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final text = context.watch<AppState>().text;
@@ -67,48 +97,43 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
+            constraints: const BoxConstraints(maxWidth: 440),
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
               children: [
-                const Row(
-                  children: [
-                    BrandMark(size: 56),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: BrandWordmark(height: 40),
-                      ),
-                    ),
-                    LanguageButton(),
-                  ],
+                const Align(
+                  alignment: Alignment.centerRight,
+                  child: LanguageButton(),
                 ),
-                const SizedBox(height: 4),
-                Text(text.fieldBook, style: const TextStyle(color: muted, fontSize: 16)),
-                const SizedBox(height: 28),
+                const SizedBox(height: 36),
+                const Center(child: BrandWordmark(height: 56)),
+                const SizedBox(height: 12),
+                Text(
+                  text.fieldBook,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: muted, fontSize: 17),
+                ),
+                const SizedBox(height: 36),
                 TextField(
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
+                  textInputAction: TextInputAction.next,
                   decoration: InputDecoration(labelText: text.email),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _password,
-                  obscureText: true,
-                  decoration: InputDecoration(labelText: text.password),
-                  onSubmitted: (_) => _busy ? null : _submit(),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _server,
-                  autocorrect: false,
+                  obscureText: _hidePassword,
                   decoration: InputDecoration(
-                    labelText: text.server,
-                    hintText: defaultApiOrigin,
-                    helperText: text.serverHint,
+                    labelText: text.password,
+                    suffixIcon: IconButton(
+                      tooltip: _hidePassword ? text.showPassword : text.hidePassword,
+                      onPressed: () => setState(() => _hidePassword = !_hidePassword),
+                      icon: Icon(_hidePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                    ),
                   ),
+                  onSubmitted: (_) => _busy ? null : _submit(),
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
@@ -119,10 +144,64 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: _busy ? null : _submit,
                   child: Text(_busy ? text.signingIn : text.signIn),
                 ),
+                const SizedBox(height: 22),
+                Text(
+                  text.accountFromOffice,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: muted, height: 1.4),
+                ),
+                const SizedBox(height: 4),
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                      );
+                    },
+                    child: Text(text.forgotPassword),
+                  ),
+                ),
+                Center(
+                  child: TextButton(
+                    onPressed: _busy ? null : _editServer,
+                    child: Text(text.server),
+                  ),
+                ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// The mobile API has no password-reset route, so this screen only tells
+/// the person to ask the office. It never claims a reset email was sent.
+class ForgotPasswordScreen extends StatelessWidget {
+  const ForgotPasswordScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final text = context.watch<AppState>().text;
+    return FieldScaffold(
+      title: text.forgotPassword,
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        children: [
+          Text(
+            text.officeResetsPassword,
+            style: const TextStyle(fontSize: 17, height: 1.45, color: ink),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(text.back),
+            ),
+          ),
+        ],
       ),
     );
   }

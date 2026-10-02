@@ -68,35 +68,44 @@ class _DealerHomeScreenState extends State<DealerHomeScreen> {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
             const QueueBanner(),
-            Text('${text.hello}, ${state.displayName}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: ink)),
+            Text('${text.hello}, ${state.displayName}', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: ink, letterSpacing: -0.4)),
             if (state.agent?['zone'] != null)
               Padding(
-                padding: const EdgeInsets.only(top: 4, bottom: 12),
+                padding: const EdgeInsets.only(top: 4),
                 child: Text('${state.agent?['zone']}', style: const TextStyle(color: muted)),
-              )
-            else
-              const SizedBox(height: 12),
+              ),
+            const SizedBox(height: 20),
             if (_loading)
               const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
             else if (_error != null)
               LoadError(message: _error!, onRetry: _load, retryLabel: text.retry)
-            else ...[
-              StatCard(label: text.outstanding, value: taka(_dash?['outstanding_balance']), onTap: () => _open(const StatementScreen())),
-              const SizedBox(height: 10),
-              Row(
+            else
+              GroupedList(
                 children: [
-                  Expanded(child: StatCard(label: text.openOrders, value: '${asInt(_dash?['open_orders'])}', onTap: () => _open(const OrdersScreen()))),
-                  const SizedBox(width: 10),
-                  Expanded(child: StatCard(label: text.deliveredMonth, value: '${asInt(_dash?['delivered_this_month'])}')),
+                  GroupedRow(
+                    title: text.dues,
+                    value: taka(_dash?['outstanding_balance']),
+                    onTap: () => _open(const StatementScreen()),
+                  ),
+                  GroupedRow(
+                    title: text.openOrders,
+                    value: '${asInt(_dash?['open_orders'])}',
+                    onTap: () => _open(const OrdersScreen()),
+                  ),
+                  GroupedRow(
+                    title: text.deliveredMonth,
+                    value: '${asInt(_dash?['delivered_this_month'])}',
+                  ),
+                  GroupedRow(
+                    title: text.products,
+                    onTap: () => _open(const OrderScreen(forEmployee: false)),
+                  ),
+                  GroupedRow(
+                    title: text.myOrders,
+                    onTap: () => _open(const OrdersScreen()),
+                  ),
                 ],
               ),
-            ],
-            const SizedBox(height: 16),
-            FilledButton(onPressed: () => _open(const OrderScreen(forEmployee: false)), child: Text(text.products)),
-            const SizedBox(height: 8),
-            OutlinedButton(onPressed: () => _open(const OrdersScreen()), child: Text(text.myOrders)),
-            const SizedBox(height: 8),
-            OutlinedButton(onPressed: () => _open(const StatementScreen()), child: Text(text.dues)),
           ],
         ),
       ),

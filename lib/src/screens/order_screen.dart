@@ -41,6 +41,7 @@ class _OrderScreenState extends State<OrderScreen> {
   List<Map<String, dynamic>> _agents = [];
   int? _agentId;
   String _orderType = 'regular';
+  String _deliveryDate = todayIso();
   List<CatalogItem> _products = [];
   int _page = 1;
   int _lastPage = 1;
@@ -160,6 +161,7 @@ class _OrderScreenState extends State<OrderScreen> {
         agentId: _agentId,
         orderType: _orderType,
         notes: _notes.text,
+        deliveryDate: _deliveryDate,
         items: items,
       );
       if (!mounted) return;
@@ -214,7 +216,7 @@ class _OrderScreenState extends State<OrderScreen> {
                           contentPadding: EdgeInsets.zero,
                           title: Text('${agent['name']}'),
                           subtitle: Text('${agent['zone'] ?? ''}'),
-                          trailing: _agentId == asInt(agent['id']) ? const Icon(Icons.check, color: brand) : null,
+                          trailing: _agentId == asInt(agent['id']) ? const Icon(Icons.check, color: ink) : null,
                           onTap: () {
                             setState(() => _agentId = asInt(agent['id']));
                             _loadProducts(reset: true);
@@ -236,6 +238,25 @@ class _OrderScreenState extends State<OrderScreen> {
               DropdownMenuItem(value: 'return', child: Text(text.returnOrder)),
             ],
             onChanged: (value) => setState(() => _orderType = value ?? 'regular'),
+          ),
+          const SizedBox(height: 10),
+          Material(
+            color: fieldFill,
+            borderRadius: BorderRadius.circular(14),
+            child: ListTile(
+              title: Text(text.deliveryDate),
+              trailing: Text(_deliveryDate, style: const TextStyle(color: ink, fontWeight: FontWeight.w600)),
+              onTap: () async {
+                final now = DateTime.now();
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.tryParse(_deliveryDate) ?? now,
+                  firstDate: now.subtract(const Duration(days: 30)),
+                  lastDate: now.add(const Duration(days: 365)),
+                );
+                if (picked != null) setState(() => _deliveryDate = todayIso(picked));
+              },
+            ),
           ),
           const SizedBox(height: 10),
           TextField(
@@ -266,7 +287,7 @@ class _OrderScreenState extends State<OrderScreen> {
                       ),
                       IconButton(onPressed: () => _changeQty(item, -1), icon: const Icon(Icons.remove_circle_outline)),
                       Text('${_qty[item.id] ?? 0}', style: const TextStyle(fontWeight: FontWeight.w700)),
-                      IconButton(onPressed: () => _changeQty(item, 1), icon: const Icon(Icons.add_circle_outline, color: brand)),
+                      IconButton(onPressed: () => _changeQty(item, 1), icon: const Icon(Icons.add_circle_outline)),
                     ],
                   ),
                 ),

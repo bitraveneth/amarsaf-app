@@ -273,13 +273,16 @@ class AppState extends ChangeNotifier {
     int? agentId,
     required String orderType,
     String? notes,
+    String? deliveryDate,
     required List<Map<String, dynamic>> items,
   }) {
+    final date = deliveryDate?.trim();
     return _sendOrQueue(
       type: forEmployee ? 'order_employee' : 'order_agent',
       body: {
         if (forEmployee) 'agent_id': agentId,
         'order_type': orderType,
+        if (date != null && date.isNotEmpty) 'delivery_date': date,
         if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
         'items': items,
       },

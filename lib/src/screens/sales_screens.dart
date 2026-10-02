@@ -74,61 +74,57 @@ class _SalesHomeScreenState extends State<SalesHomeScreen> {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
             const QueueBanner(),
-            Text('${text.hello}, ${state.displayName}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: ink)),
+            Text('${text.hello}, ${state.displayName}', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: ink, letterSpacing: -0.4)),
             if (state.employee?['work_zone'] != null)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text('${state.employee?['work_zone']}', style: const TextStyle(color: muted)),
               ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             if (_loading)
               const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
             else if (_error != null)
               LoadError(message: _error!, onRetry: _load, retryLabel: text.retry)
             else ...[
-              Card(
-                child: ListTile(
-                  title: Text(text.attendance),
-                  subtitle: Text(_attendanceLine(state, text), style: const TextStyle(fontSize: 16, color: ink, fontWeight: FontWeight.w600)),
-                  trailing: const Icon(Icons.schedule, color: brand),
-                  onTap: () => _open(const PunchScreen()),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
+              GroupedList(
                 children: [
-                  Expanded(child: StatCard(label: text.taMonth, value: taka(_dash?['ta_this_month']), onTap: () => _open(const AllowanceScreen()))),
-                  const SizedBox(width: 10),
-                  Expanded(child: StatCard(label: text.daMonth, value: taka(_dash?['da_this_month']), onTap: () => _open(const AllowanceScreen()))),
+                  GroupedRow(
+                    title: text.attendance,
+                    subtitle: _attendanceLine(state, text),
+                    onTap: () => _open(const PunchScreen()),
+                  ),
+                  GroupedRow(
+                    title: text.taMonth,
+                    value: taka(_dash?['ta_this_month']),
+                    onTap: () => _open(const AllowanceScreen()),
+                  ),
+                  GroupedRow(
+                    title: text.daMonth,
+                    value: taka(_dash?['da_this_month']),
+                    onTap: () => _open(const AllowanceScreen()),
+                  ),
+                  GroupedRow(
+                    title: text.openVisits,
+                    value: '${asInt(_dash?['open_visits'])}',
+                    onTap: () => _open(const VisitsScreen()),
+                  ),
+                  GroupedRow(
+                    title: text.orderForDealer,
+                    onTap: () => _open(const OrderScreen(forEmployee: true)),
+                  ),
                 ],
               ),
-              const SizedBox(height: 10),
-              StatCard(
-                label: text.openVisits,
-                value: '${asInt(_dash?['open_visits'])}',
-                onTap: () => _open(const VisitsScreen()),
-              ),
               if (_targets != null) ...[
-                const SizedBox(height: 10),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(text.targets, style: const TextStyle(color: muted)),
-                        const SizedBox(height: 8),
-                        Text('${text.achieved} ${taka(_targets?['achieved'])}  ·  ${text.remaining} ${taka(_targets?['remaining'])}',
-                            style: const TextStyle(fontWeight: FontWeight.w700, color: ink)),
-                        Text('${text.total} ${taka(_targets?['target'])}', style: const TextStyle(color: muted)),
-                      ],
-                    ),
-                  ),
+                const SizedBox(height: 16),
+                GroupedList(
+                  children: [
+                    GroupedRow(title: text.targets, value: taka(_targets?['target'])),
+                    GroupedRow(title: text.achieved, value: taka(_targets?['achieved'])),
+                    GroupedRow(title: text.remaining, value: taka(_targets?['remaining'])),
+                  ],
                 ),
               ],
             ],
-            const SizedBox(height: 16),
-            _ActionGrid(onOpen: _open),
           ],
         ),
       ),
@@ -150,51 +146,6 @@ class _SalesHomeScreenState extends State<SalesHomeScreen> {
   Future<void> _open(Widget page) async {
     await Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
     if (mounted) _load();
-  }
-}
-
-class _ActionGrid extends StatelessWidget {
-  const _ActionGrid({required this.onOpen});
-
-  final void Function(Widget page) onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = context.watch<AppState>().text;
-    final items = [
-      (text.punch, Icons.fingerprint, const PunchScreen()),
-      (text.visits, Icons.place_outlined, const VisitsScreen()),
-      (text.allowance, Icons.receipt_long, const AllowanceScreen()),
-      (text.orderForDealer, Icons.shopping_bag_outlined, const OrderScreen(forEmployee: true)),
-    ];
-    return GridView.count(
-      crossAxisCount: MediaQuery.sizeOf(context).width > 560 ? 4 : 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 1.35,
-      children: [
-        for (final item in items)
-          Card(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: () => onOpen(item.$3),
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(item.$2, color: brand),
-                    const Spacer(),
-                    Text(item.$1, style: const TextStyle(fontWeight: FontWeight.w700, color: ink)),
-                  ],
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
   }
 }
 
@@ -240,7 +191,7 @@ class _PunchScreenState extends State<PunchScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(onShift ? text.onShift : text.offShift, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: ink)),
+                  Text(onShift ? text.onShift : text.offShift, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: ink, letterSpacing: -0.4)),
                   const SizedBox(height: 8),
                   if (state.shiftInAt != null) Text('${text.inAt} ${formatClock(state.shiftInAt!)}'),
                   if (state.shiftOutAt != null && !onShift) Text('${text.outAt} ${formatClock(state.shiftOutAt!)}'),
@@ -257,7 +208,6 @@ class _PunchScreenState extends State<PunchScreen> {
           const SizedBox(height: 20),
           FilledButton(
             onPressed: _busy ? null : () => _punch(!onShift),
-            style: FilledButton.styleFrom(backgroundColor: onShift ? clay : brand),
             child: Text(_busy ? text.loading : (onShift ? text.punchOut : text.punchIn)),
           ),
         ],
@@ -344,8 +294,6 @@ class _VisitsScreenState extends State<VisitsScreen> {
           );
           if (added == true) _load();
         },
-        backgroundColor: brand,
-        foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
         label: Text(text.addVisit),
       ),
@@ -395,7 +343,7 @@ class _VisitCard extends StatelessWidget {
               if (visit['slot'] != null) Text('${visit['slot']}', style: const TextStyle(color: muted)),
               if (visit['notes'] != null && '${visit['notes']}'.isNotEmpty) Text('${visit['notes']}'),
               const SizedBox(height: 6),
-              Text(text.statusLabel(status), style: TextStyle(color: done ? brand : clay, fontWeight: FontWeight.w600)),
+              Text(text.statusLabel(status), style: TextStyle(color: done ? muted : ink, fontWeight: FontWeight.w600)),
               if (visit['latitude'] != null)
                 Text('${visit['latitude']}, ${visit['longitude']}', style: const TextStyle(color: muted, fontSize: 12)),
               if (!done) ...[
@@ -530,11 +478,11 @@ class _AddVisitScreenState extends State<AddVisitScreen> {
                   ...shown.map((agent) {
                     final id = asInt(agent['id']);
                     return Card(
-                      color: _agentId == id ? moss : card,
+                      color: _agentId == id ? fieldFill : card,
                       child: ListTile(
                         title: Text('${agent['name']}'),
                         subtitle: Text('${agent['zone'] ?? agent['area'] ?? ''}'),
-                        trailing: _agentId == id ? const Icon(Icons.check, color: brand) : null,
+                        trailing: _agentId == id ? const Icon(Icons.check, color: ink) : null,
                         onTap: () => setState(() => _agentId = id),
                       ),
                     );
@@ -662,7 +610,7 @@ class _AllowanceScreenState extends State<AllowanceScreen> {
             contentPadding: EdgeInsets.zero,
             title: Text(text.date),
             subtitle: Text(_date),
-            trailing: const Icon(Icons.calendar_today, color: brand),
+            trailing: const Icon(Icons.calendar_today, color: muted),
             onTap: () async {
               final picked = await showDatePicker(
                 context: context,
@@ -677,11 +625,11 @@ class _AllowanceScreenState extends State<AllowanceScreen> {
           const SizedBox(height: 8),
           Text(text.billOptional, style: const TextStyle(color: muted)),
           const SizedBox(height: 8),
-          Row(
+          Wrap(
+            spacing: 8,
             children: [
-              Expanded(child: OutlinedButton(onPressed: () => _pick(ImageSource.camera), child: Text(text.takePhoto))),
-              const SizedBox(width: 8),
-              Expanded(child: OutlinedButton(onPressed: () => _pick(ImageSource.gallery), child: Text(text.choosePhoto))),
+              TextButton(onPressed: () => _pick(ImageSource.camera), child: Text(text.takePhoto)),
+              TextButton(onPressed: () => _pick(ImageSource.gallery), child: Text(text.choosePhoto)),
             ],
           ),
           if (_photo != null)
@@ -689,7 +637,7 @@ class _AllowanceScreenState extends State<AllowanceScreen> {
               alignment: Alignment.centerLeft,
               child: TextButton(onPressed: () => setState(() => _photo = null), child: Text(text.removePhoto)),
             ),
-          if (_photo != null) Text(text.photoAttached, style: const TextStyle(color: brand)),
+          if (_photo != null) Text(text.photoAttached, style: const TextStyle(color: ink)),
           if (_error != null) ...[
             const SizedBox(height: 8),
             Text(_error!, style: const TextStyle(color: clay)),
@@ -707,7 +655,7 @@ class _AllowanceScreenState extends State<AllowanceScreen> {
                 contentPadding: EdgeInsets.zero,
                 title: Text('${bill['type']} · ${taka(bill['amount'])}'),
                 subtitle: Text('${bill['date'] ?? ''} · ${text.statusLabel('${bill['status']}')}'),
-                trailing: bill['attachment_path'] != null ? const Icon(Icons.attach_file, color: brand) : null,
+                trailing: bill['attachment_path'] != null ? const Icon(Icons.attach_file, color: muted) : null,
               ),
         ],
       ),
