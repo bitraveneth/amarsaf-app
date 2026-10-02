@@ -158,12 +158,58 @@ class PunchScreen extends StatefulWidget {
 
 class _PunchScreenState extends State<PunchScreen> {
   bool _busy = false;
+  bool _loading = true;
+  String? _error;
+  PunchSummary? _summary;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load({bool silent = false}) async {
+    final state = context.read<AppState>();
+    if (!silent) {
+      setState(() {
+        _loading = true;
+        _error = null;
+      });
+    }
+    try {
+      final response = await state.fetch(
+        '/employee/location-logs',
+        query: const {'limit': '1000'},
+      );
+      final data = response['data'];
+      if (!mounted) return;
+      setState(() {
+        _summary = summarizePunchLogs(data is List ? data : const []);
+        _loading = false;
+        _error = null;
+      });
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _error = error.message;
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _reload() async {
+    await context.read<AppState>().refreshPunch();
+    if (!mounted) return;
+    await _load(silent: true);
+  }
 
   Future<void> _punch(bool clockIn) async {
     final state = context.read<AppState>();
     setState(() => _busy = true);
     try {
       final result = await state.punch(clockIn);
+      if (!mounted) return;
+      await _load(silent: true);
       if (!mounted) return;
       await showNotice(context, result.queued ? state.text.offlineSaved : state.text.saved);
     } on ApiException catch (error) {
@@ -179,37 +225,84 @@ class _PunchScreenState extends State<PunchScreen> {
     final text = state.text;
     final pending = state.queue.pendingPunch(state.userId);
     final onShift = pending == 'in' || (pending == null && state.punchedIn);
+    final summary = _summary;
     return FieldScaffold(
       title: text.punch,
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          const QueueBanner(),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(onShift ? text.onShift : text.offShift, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: ink, letterSpacing: -0.4)),
-                  const SizedBox(height: 8),
-                  if (state.shiftInAt != null) Text('${text.inAt} ${formatClock(state.shiftInAt!)}'),
-                  if (state.shiftOutAt != null && !onShift) Text('${text.outAt} ${formatClock(state.shiftOutAt!)}'),
-                  if (state.lastPingAt != null) ...[
-                    const SizedBox(height: 8),
-                    Text('${text.lastPing} ${formatClock(state.lastPingAt!)}', style: const TextStyle(color: muted)),
-                  ],
-                ],
+      body: RefreshIndicator(
+        onRefresh: _reload,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          children: [
+            const QueueBanner(),
+            Text(
+              _status(state, text, onShift, pending),
+              style: TextStyle(
+                fontSize: 34,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.6,
+                height: 1.15,
+                color: onShift ? brand : ink,
               ),
             ),
+            const SizedBox(height: 20),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(64),
+                textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              ),
+              onPressed: _busy ? null : () => _punch(!onShift),
+              child: Text(_busy ? text.loading : (onShift ? text.punchOut : text.punchIn)),
+            ),
+            const SizedBox(height: 12),
+            Text(text.pingNote, style: const TextStyle(color: muted, height: 1.4, fontSize: 13)),
+            const SizedBox(height: 24),
+            if (_loading && summary == null)
+              const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
+            else if (_error != null && summary == null)
+              LoadError(message: _error!, onRetry: _load, retryLabel: text.retry)
+            else if (summary != null) ...[
+              _section(text.today, [
+                GroupedRow(title: text.inAt, value: _clock(summary.today.inAt)),
+                GroupedRow(title: text.outAt, value: _clock(summary.today.outAt)),
+                GroupedRow(title: text.hoursSoFar, value: text.formatHours(summary.today.hours)),
+              ]),
+              _section(text.yesterday, [
+                GroupedRow(title: text.inAt, value: _clock(summary.yesterday.inAt)),
+                GroupedRow(title: text.outAt, value: _clock(summary.yesterday.outAt)),
+              ]),
+              _section(text.thisWeek, [
+                GroupedRow(title: text.daysPunched, value: '${summary.weekDays}'),
+                GroupedRow(title: text.weekHours, value: text.formatHours(summary.weekHours)),
+              ]),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _status(AppState state, L10n text, bool onShift, String? pending) {
+    if (pending != null) return text.waitingPunch;
+    if (onShift && state.shiftInAt != null) return '${text.inSince} ${formatClock(state.shiftInAt!)}';
+    if (onShift) return text.inSince;
+    if (state.shiftOutAt != null) return '${text.punchedOut} ${formatClock(state.shiftOutAt!)}';
+    return text.notPunched;
+  }
+
+  String _clock(DateTime? value) => value == null ? '—' : formatClock(value);
+
+  Widget _section(String title, List<Widget> rows) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 6),
+            child: Text(title, style: const TextStyle(color: muted, fontSize: 13, fontWeight: FontWeight.w600)),
           ),
-          const SizedBox(height: 16),
-          Text(text.pingNote, style: const TextStyle(color: muted, height: 1.4)),
-          const SizedBox(height: 20),
-          FilledButton(
-            onPressed: _busy ? null : () => _punch(!onShift),
-            child: Text(_busy ? text.loading : (onShift ? text.punchOut : text.punchIn)),
-          ),
+          GroupedList(children: rows),
         ],
       ),
     );

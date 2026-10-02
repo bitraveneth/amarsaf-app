@@ -55,6 +55,45 @@ void main() {
     expect(yesterday.punchedIn, isFalse);
   });
 
+  test('punch summary uses in/out pairs and skips pings', () {
+    final now = DateTime(2026, 10, 2, 11);
+    expect(now.weekday, DateTime.friday);
+
+    final summary = summarizePunchLogs([
+      {'event_type': 'punch_in', 'logged_at': '2026-09-27T09:00:00'},
+      {'event_type': 'punch_out', 'logged_at': '2026-09-27T17:00:00'},
+      {'event_type': 'punch_in', 'logged_at': '2026-09-28T09:00:00'},
+      {'event_type': 'punch_out', 'logged_at': '2026-09-28T12:00:00'},
+      {'event_type': 'punch_in', 'logged_at': '2026-10-01T08:30:00'},
+      {'event_type': 'ping', 'logged_at': '2026-10-01T09:00:00'},
+      {'event_type': 'punch_out', 'logged_at': '2026-10-01T16:30:00'},
+      {'event_type': 'punch_in', 'logged_at': '2026-10-02T09:05:00'},
+      {'event_type': 'ping', 'logged_at': '2026-10-02T09:20:00'},
+      {'event_type': 'punch_out', 'logged_at': '2026-10-02T10:05:00'},
+      {'event_type': 'punch_in', 'logged_at': '2026-10-02T10:15:00'},
+    ], now: now);
+
+    expect(summary.today.inAt?.hour, 9);
+    expect(summary.today.outAt?.hour, 10);
+    expect(summary.today.hours, const Duration(hours: 1, minutes: 45));
+    expect(summary.yesterday.inAt?.hour, 8);
+    expect(summary.yesterday.outAt?.hour, 16);
+    expect(summary.weekDays, 3);
+    expect(summary.weekHours, const Duration(hours: 12, minutes: 45));
+  });
+
+  test('an open punch from yesterday does not invent an out or hours', () {
+    final summary = summarizePunchLogs([
+      {'event_type': 'punch_in', 'logged_at': '2026-10-01T09:00:00'},
+    ], now: DateTime(2026, 10, 2, 11));
+
+    expect(summary.yesterday.inAt?.hour, 9);
+    expect(summary.yesterday.outAt, isNull);
+    expect(summary.yesterday.hours, Duration.zero);
+    expect(summary.today.inAt, isNull);
+    expect(summary.weekHours, Duration.zero);
+  });
+
   test('visit complete waits for the queued visit create', () {
     final queue = OfflineQueue();
     queue.add(QueuedJob(id: 'create', userId: '7', type: 'visit_create', body: {'agent_id': 3}));

@@ -47,8 +47,22 @@ class L10n {
   String get onShift => bn ? 'শিফটে আছেন' : 'On shift';
   String get offShift => bn ? 'শিফট বন্ধ' : 'Off shift';
   String get notPunched => bn ? 'আজ এখনো হাজিরা হয়নি' : 'Not punched in yet';
+  String get inSince => bn ? 'ঢুকেছেন' : 'In since';
+  String get punchedOut => bn ? 'বের হয়েছেন' : 'Punched out';
   String get inAt => bn ? 'ঢুকেছেন' : 'In at';
   String get outAt => bn ? 'বের হয়েছেন' : 'Out at';
+  String get yesterday => bn ? 'গতকাল' : 'Yesterday';
+  String get thisWeek => bn ? 'এই সপ্তাহ' : 'This week';
+  String get hoursSoFar => bn ? 'এ পর্যন্ত' : 'Hours so far';
+  String get daysPunched => bn ? 'হাজিরার দিন' : 'Days with a punch';
+  String get weekHours => bn ? 'মোট সময়' : 'Hours';
+
+  String formatHours(Duration value) {
+    final minutes = value.inMinutes < 0 ? 0 : value.inMinutes;
+    final h = minutes ~/ 60;
+    final m = (minutes % 60).toString().padLeft(2, '0');
+    return bn ? '$h ঘ $m মি' : '${h}h $m';
+  }
   String get pingNote => bn
       ? 'শিফট চলাকালীন অ্যাপ খোলা থাকলে প্রায় ১২ মিনিট পর পর লোকেশন পাঠানো হয়। হাজিরা শেষ হলে বা অ্যাপ বন্ধ থাকলে আর পাঠায় না।'
       : 'While you are punched in and this app is open, your location is sent about every 12 minutes. Punch out, or leave the app, and it stops.';
