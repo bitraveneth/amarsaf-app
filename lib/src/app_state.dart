@@ -153,8 +153,14 @@ class AppState extends ChangeNotifier {
 
   Future<void> refreshPunch() async {
     if (token == null || !homePunches(role)) {
-      punchedIn = false;
-      notifyListeners();
+      // Notifying here used to run while the home screen was still mounting
+      // and registering inherited-widget listeners.
+      if (punchedIn || shiftInAt != null || shiftOutAt != null) {
+        punchedIn = false;
+        shiftInAt = null;
+        shiftOutAt = null;
+        notifyListeners();
+      }
       return;
     }
     try {

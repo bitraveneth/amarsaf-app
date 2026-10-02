@@ -17,6 +17,10 @@ OutlineInputBorder _fieldBorder(Color color) {
   );
 }
 
+/// Built once. A new [ThemeData] on every notify does not compare equal, so
+/// [MaterialApp] would replace its inherited theme while children still depend on it.
+final appTheme = buildTheme();
+
 ThemeData buildTheme() {
   final base = ThemeData(
     useMaterial3: true,

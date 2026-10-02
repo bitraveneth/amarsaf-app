@@ -44,27 +44,44 @@ class _AmarSafAppState extends State<AmarSafApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      context.read<AppState>().onResume();
-    }
+    if (state != AppLifecycleState.resumed || !mounted) return;
+    final app = context.read<AppState>();
+    // Resume can arrive while the first frame is still building. Wait until
+    // that frame finishes before refresh notifies listeners.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) app.onResume();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final app = context.watch<AppState>();
+    final language = context.select<AppState, String>((app) => app.language);
     return MaterialApp(
       title: 'AmarSaf Field',
       debugShowCheckedModeBanner: false,
-      theme: buildTheme(),
-      locale: Locale(app.language == 'bn' ? 'bn' : 'en'),
+      theme: appTheme,
+      locale: Locale(language == 'bn' ? 'bn' : 'en'),
       supportedLocales: const [Locale('en'), Locale('bn')],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: _home(app),
+      home: const HomeGate(),
     );
+  }
+}
+
+/// Role home sits under a stable [MaterialApp]. Watching [AppState] here, instead
+/// of above [MaterialApp], keeps the navigator and theme from being deactivated
+/// on punch refresh and bootstrap.
+class HomeGate extends StatelessWidget {
+  const HomeGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final app = context.watch<AppState>();
+    return _home(app);
   }
 
   Widget _home(AppState app) {
